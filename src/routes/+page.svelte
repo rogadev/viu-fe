@@ -7,7 +7,6 @@
   import ProgramsFilter from '$lib/components/ProgramsFilter.svelte'
   import H2 from '$lib/components/viu/H2.svelte'
   import FetchedResults from '$lib/components/FetchedResults.svelte'
-  import getPrograms from '$lib/server/functions/getPrograms'
   import Loading from '$lib/components/Loading.svelte'
 
   // If we have programs in our store, it should load these without the need for an additional fetch() request.
@@ -15,10 +14,17 @@
   $: programList = $programs.map((v) => v)
 
   /**
-   * Check the programs store (programList subscribed to store) and if it's empty, fetch the programs from the server.
+   * Fetches programs directly from the API endpoint
    */
   async function fetchProgramList() {
-    $programs = await getPrograms()
+    const response = await fetch('/api/v1/programs')
+    const data = await response.json()
+    $programs = data.map(({ nid, title, credential, program_area }) => ({
+      nid,
+      title,
+      credential,
+      program: program_area.title,
+    }))
   }
 
   // @ts-ignore
